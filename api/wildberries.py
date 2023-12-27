@@ -116,7 +116,7 @@ class WB:
 
         Документация: https://openapi.wildberries.ru/prices/api/ru/#tag/Ceny/paths/~1public~1api~1v1~1info/get
         """
-        url = WB._URL_STATISTICS + '/public/api/v1/info'
+        url = WB._URL_SUPPLIERS + '/public/api/v1/info'
         params = {}
         if quantity is not None:
             params['quantity'] = quantity
