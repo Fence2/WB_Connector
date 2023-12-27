@@ -35,7 +35,7 @@ class WB:
             data = {}
 
         try:
-            result = requests.get(
+            result = requests.post(
                 url=url,
                 headers=self._headers,
                 json=data
