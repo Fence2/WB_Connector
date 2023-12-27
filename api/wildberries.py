@@ -122,3 +122,14 @@ class WB:
             params['quantity'] = quantity
 
         return self._api_request__get(url, params)
+
+    # def set_prices(self, nm_list: list[dict[int, int]]):  Only for Python 3.10
+    def set_prices(self, nm_list: list):
+        """
+        Загрузка цен. За раз можно загрузить не более 1000 номенклатур.
+
+        Документация: https://openapi.wildberries.ru/prices/api/ru/#tag/Ceny/paths/~1public~1api~1v1~1prices/post
+        """
+
+        url = WB._URL_SUPPLIERS + '/public/api/v1/prices'
+        return self._api_request__post(url, nm_list)
