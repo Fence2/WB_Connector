@@ -109,3 +109,16 @@ class WB:
             params['flag'] = flag
 
         return self._api_request__get(url, params)
+
+    def get_prices(self, quantity: int = None):
+        """
+        Получение информации по номенклатурам, их ценам, скидкам и промокодам. Если не указывать фильтры, вернётся весь товар.
+
+        Документация: https://openapi.wildberries.ru/prices/api/ru/#tag/Ceny/paths/~1public~1api~1v1~1info/get
+        """
+        url = WB._URL_STATISTICS + '/public/api/v1/info'
+        params = {}
+        if quantity is not None:
+            params['quantity'] = quantity
+
+        return self._api_request__get(url, params)
