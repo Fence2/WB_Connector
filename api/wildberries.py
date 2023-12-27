@@ -1,0 +1,51 @@
+import requests
+
+
+class WB:
+    _URL_SUPPLIERS: str = 'https://suppliers-api.wildberries.ru'
+    _URL_STATISTICS: str = 'https://statistics-api.wildberries.ru'
+    _URL_ADVERT: str = 'https://advert-media-api.wb.ru'
+    _URL_RECOMMEND: str = 'https://recommend-api.wildberries.ru'
+    _URL_FEEDBACKS: str = 'https://feedbacks-api.wildberries.ru'
+
+    def __init__(self, token: str):
+        self._token = token
+        self._headers = {'Authorization': f'Bearer {token}'}
+
+    def _api_request__get(self, url: str, params: dict = None):
+        if params is None:
+            params = {}
+
+        try:
+            result = requests.get(
+                url=url,
+                headers=self._headers,
+                params=params
+            )
+        except Exception as e:
+            return {'errors': str(e)}
+
+        try:
+            return result.json()
+        except (requests.exceptions.JSONDecodeError, requests.exceptions.InvalidJSONError):
+            return result.text
+
+    def _api_request__post(self, url: str, data: dict = None):
+        if data is None:
+            data = {}
+
+        try:
+            result = requests.get(
+                url=url,
+                headers=self._headers,
+                json=data
+            )
+        except Exception as e:
+            return {'errors': str(e)}
+
+        try:
+            return result.json()
+        except (requests.exceptions.JSONDecodeError, requests.exceptions.InvalidJSONError):
+            return result.text
+
+
