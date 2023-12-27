@@ -30,7 +30,7 @@ class WB:
         except (requests.exceptions.JSONDecodeError, requests.exceptions.InvalidJSONError):
             return result.text
 
-    def _api_request__post(self, url: str, data: dict = None):
+    def _api_request__post(self, url: str, data=None):
         if data is None:
             data = {}
 
