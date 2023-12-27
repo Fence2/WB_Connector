@@ -48,6 +48,20 @@ class WB:
         except (requests.exceptions.JSONDecodeError, requests.exceptions.InvalidJSONError):
             return result.text
 
+    def get_stocks(self, date_from: str):
+        """
+        Остатки товаров на складах WB. Данные обновляются раз в 30 минут.
+        Сервис статистики не хранит историю остатков товаров, поэтому получить данные о них можно только в режиме "на текущий момент".
+
+
+        Документация: https://openapi.wildberries.ru/statistics/api/ru/#tag/Statistika/paths/~1api~1v1~1supplier~1stocks/get
+        """
+
+        url = WB._URL_STATISTICS + '/api/v1/supplier/stocks'
+        params = dict(dateFrom=date_from)
+
+        return self._api_request__get(url, params)
+
     def get_orders(self, date_from: str, flag: int = None):
         """
         Заказы.
@@ -65,3 +79,5 @@ class WB:
             params['flag'] = flag
 
         return self._api_request__get(url, params)
+
+
