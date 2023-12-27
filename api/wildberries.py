@@ -48,4 +48,20 @@ class WB:
         except (requests.exceptions.JSONDecodeError, requests.exceptions.InvalidJSONError):
             return result.text
 
+    def get_orders(self, date_from: str, flag: int = None):
+        """
+        Заказы.
+        Гарантируется хранение данных не более 90 дней от даты заказа.
+        Данные обновляются раз в 30 минут.
+        Для идентификации заказа следует использовать поле srid.
+        1 строка = 1 заказ = 1 единица товара.
 
+        Документация: https://openapi.wildberries.ru/statistics/api/ru/#tag/Statistika/paths/~1api~1v1~1supplier~1orders/get
+        """
+
+        url = WB._URL_STATISTICS + '/api/v1/supplier/orders'
+        params = dict(dateFrom=date_from)
+        if flag is not None:
+            params['flag'] = flag
+
+        return self._api_request__get(url, params)
