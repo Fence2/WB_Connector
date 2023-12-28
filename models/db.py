@@ -1,4 +1,7 @@
 import psycopg2
+import psycopg2.extras as extras
+import pandas as pd
+import numpy as np
 
 
 class Postgres:
@@ -57,5 +60,34 @@ class Postgres:
             try:
                 cur.execute(Postgres.WB_ORDERS_SCHEMA)
                 self.conn.commit()
-            except Exception as e:
-                return str(e)
+            except (Exception, psycopg2.DatabaseError) as error:
+                print("Error: %s" % error)
+                return str(error)
+
+    def execute_values(self, df: pd.DataFrame, table: str):
+        """
+        Загрузка DataFrame объекта в БД
+
+        :param df: DataFrame объект, где столбцы = столбцы в таблице table
+        :param table: Название таблицы в БД
+        :return: При успешной вставке значений - возвращает количество вставленных строк. Иначе - текст ошибки
+        """
+        # Если значение не существует, заменяем значение nan на понятное для БД - None
+        df.replace({np.nan: None}, inplace=True)
+
+        data_rows = tuple([tuple(row) for row in df.to_numpy()])
+        cols = ','.join(list(df.columns))
+
+        query = "INSERT INTO %s (%s) VALUES %%s" % (table, cols)
+
+        with (self.conn.cursor() as cur):
+            try:
+                extras.execute_values(cur, query, data_rows)
+                result = cur.rowcount
+                self.conn.commit()
+            except (Exception, psycopg2.DatabaseError) as error:
+                print("Error: %s" % error)
+                self.conn.rollback()
+                result = str(error)
+
+        return result
