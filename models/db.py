@@ -4,9 +4,9 @@ import psycopg2
 class Postgres:
     WB_ORDERS_SCHEMA = """
     CREATE TABLE IF NOT EXISTS orders (
-        srid INT PRIMARY KEY,
+        srid TEXT PRIMARY KEY,
         gNumber VARCHAR(50),
-        createDate TIMESTAMP,
+        date TIMESTAMP,
         lastChangeDate TIMESTAMP,
         orderType VARCHAR(50),
         warehouseName VARCHAR(50),
