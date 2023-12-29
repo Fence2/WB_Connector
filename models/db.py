@@ -91,3 +91,19 @@ class Postgres:
                 result = str(error)
 
         return result
+
+    def select(self, cols: list, table: str):
+        cols = ','.join(cols)
+
+        query = """SELECT %s FROM %s;""" % (cols, table)
+
+        with self.conn.cursor() as cur:
+            try:
+                cur.execute(query)
+                result = cur.fetchall()
+            except (Exception, psycopg2.DatabaseError) as error:
+                print("Error: %s" % error)
+                self.conn.rollback()
+                result = str(error)
+
+        return result
