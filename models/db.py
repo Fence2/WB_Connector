@@ -73,14 +73,14 @@ class Postgres:
         :return: При успешной вставке значений - возвращает количество вставленных строк. Иначе - текст ошибки
         """
         # Если значение не существует, заменяем значение nan на понятное для БД - None
-        df.replace({np.nan: None}, inplace=True)
+        df = df.replace({np.nan: None})
 
         data_rows = tuple([tuple(row) for row in df.to_numpy()])
         cols = ','.join(list(df.columns))
 
         query = "INSERT INTO %s (%s) VALUES %%s" % (table, cols)
 
-        with (self.conn.cursor() as cur):
+        with self.conn.cursor() as cur:
             try:
                 extras.execute_values(cur, query, data_rows)
                 result = cur.rowcount
@@ -95,7 +95,7 @@ class Postgres:
     def select(self, cols: list, table: str):
         cols = ','.join(cols)
 
-        query = """SELECT %s FROM %s;""" % (cols, table)
+        query = f"SELECT {cols} FROM {table}"
 
         with self.conn.cursor() as cur:
             try:
