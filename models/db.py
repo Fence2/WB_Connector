@@ -107,3 +107,27 @@ class Postgres:
                 result = str(error)
 
         return result
+
+    def insert_df(self, df: pd.DataFrame):
+        # Если значение не существует, заменяем значение nan на понятное для БД - None
+        df = df.replace({np.nan: None})
+        total_changes = 0
+        placeholders = ', '.join([f"{col} = %s" for col in df.columns if col not in ('srid', 'db_lastChangeDate')])
+        query = f"UPDATE orders SET {placeholders} WHERE srid = %s;"
+
+        for index, row in df.iterrows():
+            srid = row['srid']
+            row = row.drop('srid')
+            row = row.drop('db_lastChangeDate')
+            data = tuple(row)
+
+            with self.conn.cursor() as cur:
+                try:
+                    cur.execute(query, data + (srid,))
+                    total_changes += cur.rowcount
+                    self.conn.commit()
+                except (Exception, psycopg2.DatabaseError) as error:
+                    print(f"Error: {error}")
+                    self.conn.rollback()
+
+        return total_changes
