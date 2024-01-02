@@ -86,12 +86,42 @@ x = psql.initialize_db()
 # Формируем датафрейм с заказами
 orders_df: pd.DataFrame = pd.DataFrame.from_dict(orders_json)
 
-# Загружаем заказы в таблицу orders
-result = psql.execute_values(orders_df, 'orders')
+orders_in_db = psql.select(cols=['srid'], table='orders')
+orders_in_db = [order[0] for order in orders_in_db]
 
-# Выводим результат загрузки заказов
-if isinstance(result, int):
-    print(f"Всего загружено {result} заказов")
-else:
-    print(result)  # Ошибка
+old_orders = orders_df.loc[orders_df['srid'].isin(orders_in_db)]
+new_orders = orders_df.loc[~orders_df['srid'].isin(orders_in_db)]
+
+if len(new_orders):
+    # Загружаем новые заказы в таблицу orders
+    result = psql.execute_values(new_orders, 'orders')
+
+    # Выводим результат загрузки заказов
+    if isinstance(result, int) and result >= 0:
+        print(f"Всего загружено {result} заказов")
+    else:
+        print(f"Ошибка: {result}")  # Ошибка
+
+if len(old_orders):
+    # Получаем список заказов и последнюю дату изменения
+    srids = tuple(old_orders['srid'])
+    query = "SELECT srid, lastChangeDate FROM orders WHERE srid IN %s"
+
+    with psql.conn.cursor() as cur:
+        cur.execute(query, (srids,))
+        result = cur.fetchall()
+
+    # Фильтруем значения, выбирая только те заказы, где дата изменения больше даты изменения в БД
+    db_orders = {order[0]: order[1].isoformat() for order in result}
+
+    old_orders['db_lastChangeDate'] = old_orders['srid'].map(db_orders)
+
+    changed_orders = old_orders[old_orders['lastChangeDate'] > old_orders['db_lastChangeDate']]
+
+    result = psql.insert_df(changed_orders)
+
+    if isinstance(result, int) and result >= 0:
+        print(f"Всего изменено {result} заказов")
+    else:
+        print(f"Ошибка: {result}")  # Ошибка
 
